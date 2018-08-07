@@ -1,8 +1,23 @@
-import numpy as np
+import contextlib
+import sys
 
-from . import utils
+import numpy as np
+import pyaudio
 
 __all__ = ["hear"]
+
+
+class DummyFile(object):
+    def write(self, _):
+        pass
+
+
+@contextlib.contextmanager
+def discard_stdout():
+    real_stdout = sys.stdout
+    sys.stdout  = DummyFile()
+    yield
+    sys.stdout = real_stdout
 
 
 def hear(callback, channels=2, body=None,
@@ -66,7 +81,6 @@ def hear_jack(callback, channels, body, client_name):
 
 
 def hear_pa(callback, channels, body, rate, frames_per_buffer):
-    import pyaudio
     pa = pyaudio.PyAudio()
 
     def stream_cb(in_data, frame_count, time_info, status):
@@ -99,9 +113,7 @@ def hear_pa(callback, channels, body, rate, frames_per_buffer):
 
 
 def is_jack_active():
-    import pyaudio
-
-    with utils.discard_stdout():
+    with discard_stdout():
         pa = pyaudio.PyAudio()
 
     apis = [pa.get_host_api_info_by_index(i)["name"]
