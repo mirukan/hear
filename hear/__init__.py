@@ -44,8 +44,6 @@ def hear_jack(callback, channels, body, client_name):
 
         callback(data)
 
-        return jack.CALL_AGAIN
-
     for i in range(channels):
         client.inports.register("input_{0}".format(i+1))
 
@@ -86,7 +84,7 @@ def hear_pa(callback, channels, body, rate, frames_per_buffer):
                      input=True,
                      input_device_index=0,
                      stream_callback=stream_cb
-                     )
+                    )
 
     stream.start_stream()
 
