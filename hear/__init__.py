@@ -1,5 +1,7 @@
 import numpy as np
 
+from . import utils
+
 __all__ = ["hear"]
 
 
@@ -98,9 +100,9 @@ def hear_pa(callback, channels, body, rate, frames_per_buffer):
 
 def is_jack_active():
     import pyaudio
-    print("--- portaudio annoying verbosity:")
-    pa = pyaudio.PyAudio()
-    print("---\n")
+
+    with utils.discard_stdout():
+        pa = pyaudio.PyAudio()
 
     apis = [pa.get_host_api_info_by_index(i)["name"]
             for i in range(pa.get_host_api_count())]
