@@ -13,11 +13,13 @@ class DummyFile(object):
 
 
 @contextlib.contextmanager
-def discard_stdout():
+def discard_output():
     real_stdout = sys.stdout
-    sys.stdout  = DummyFile()
+    real_stderr = sys.stderr
+    sys.stdout  = sys.stderr = DummyFile()
     yield
     sys.stdout = real_stdout
+    sys.stderr = real_stderr
 
 
 def hear(callback, channels=2, body=None,
@@ -81,7 +83,8 @@ def hear_jack(callback, channels, body, client_name):
 
 
 def hear_pa(callback, channels, body, rate, frames_per_buffer):
-    pa = pyaudio.PyAudio()
+    with discard_output():
+        pa = pyaudio.PyAudio()
 
     def stream_cb(in_data, frame_count, time_info, status):
         data = np.fromstring(in_data, dtype=np.float32)
@@ -113,7 +116,7 @@ def hear_pa(callback, channels, body, rate, frames_per_buffer):
 
 
 def is_jack_active():
-    with discard_stdout():
+    with discard_output():
         pa = pyaudio.PyAudio()
 
     apis = [pa.get_host_api_info_by_index(i)["name"]
